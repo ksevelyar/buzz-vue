@@ -1,5 +1,5 @@
 {
-  description = "openchat-vue";
+  description = "buzz-vue";
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
   outputs = {
@@ -16,7 +16,7 @@
         ];
 
         shellHook = ''
-          export VITE_BACK=http://openchat.lcl:5001
+          export VITE_BACK=http://buzz.lcl:5001
         '';
       };
     });
