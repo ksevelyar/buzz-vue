@@ -1,9 +1,13 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import { ref } from 'vue'
+const messages = ref([])
+const inputText = ref('')
 
-const socketUrl = "ws://localhost:4000/socket/websocket"
+const socketUrl = "ws://localhost:4001/socket/websocket"
 
 const socket = new WebSocket(socketUrl)
+
+const generateRandomRef = () => Math.floor(Math.random() * 1000000)
 
 function joinTopic(topic, payload = {}) {
   socket.onopen = () => {
@@ -11,19 +15,20 @@ function joinTopic(topic, payload = {}) {
       topic: topic,
       event: "phx_join",
       payload: payload,
-      ref: 1
+      ref: generateRandomRef()
     }
 
     socket.send(JSON.stringify(joinMessage))
 
     console.log(`Attempting to join topic: ${topic}`)
-
-    sendMessage("room:lobby", "shout", { body: "Hello from the client!" })
   }
 
   socket.onmessage = (event) => {
-    const message = JSON.parse(event.data)
-    console.log("Received message:", message)
+    const response = JSON.parse(event.data)
+
+    if (response.event === 'shout') {
+      messages.value.push(response.payload)
+    }
   }
 
   socket.onerror = (error) => {
@@ -35,29 +40,53 @@ function joinTopic(topic, payload = {}) {
   }
 }
 
-function sendMessage(topic, event, payload = {}) {
+function sendMessage() {
   const message = {
-    topic: topic,     // Topic to send the message to (e.g., "room:lobby")
-    event: event,     // The custom event, e.g., "new_message"
-    payload: payload, // The payload containing your data
-    ref: 2            // Reference for the message
+    topic: "room:lobby",
+    event: "shout",
+    payload: {body: inputText.value},
+    ref: generateRandomRef()
   }
 
-  // Send the message
   socket.send(JSON.stringify(message))
-  console.log(`Sent message: ${event} with payload:`, payload)
+  inputText.value = ''
 }
 
-joinTopic("room:lobby", { user_id: 123 })
-
-
+joinTopic("room:lobby")
 </script>
 
 <template lang="pug">
 .messages
+  .message(v-for="message in messages") {{ message.body }}
 
-input(placeholder="message")
+input.input(
+  v-model="inputText"
+  @keydown.enter="sendMessage"
+)
 </template>
 
 <style>
+.app
+  display: flex
+  align-items: center
+  display: flex
+  justify-content: center
+  min-height: 100vh
+  flex-direction: column
+  gap: 10px
+  background: #d4d4d4
+
+.input
+  border-radius: 4px
+  border: 1px solid #ddd
+  padding: 10px
+  width: 50%
+  outline: none
+  max-width: 80ch
+
+body
+  margin: 0
+
+input, textarea, select
+  box-sizing: border-box
 </style>
