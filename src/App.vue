@@ -1,7 +1,9 @@
 <script setup>
 import { ref } from 'vue'
+
 const messages = ref([])
 const inputText = ref('')
+const users = ref([])
 
 const socketUrl = "ws://localhost:4001/socket/websocket"
 
@@ -26,8 +28,19 @@ function joinTopic(topic, payload = {}) {
   socket.onmessage = (event) => {
     const response = JSON.parse(event.data)
 
+
     if (response.event === 'shout') {
       messages.value.push(response.payload)
+    }
+
+    if (response.event === 'user_joined') {
+      users.value.push(response.payload.handle)
+    }
+
+    if (response.event === 'user_disconnected') {
+      const handle = response.payload.handle
+
+      users.value = users.value.filter(saved_handle => saved_handle !== handle)
     }
   }
 
@@ -63,6 +76,9 @@ input.input(
   v-model="inputText"
   @keydown.enter="sendMessage"
 )
+
+ul.users
+  li.user(v-for="user in users") {{ user }}
 </template>
 
 <style>
