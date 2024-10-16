@@ -1,74 +1,55 @@
 <script setup>
+import chatClient from '@/client/chat-client.js'
+
+import ChatList from '@/components/ChatList.vue'
 import { ref } from 'vue'
 
 const messages = ref([])
 const inputText = ref('')
 const users = ref([])
 
-const socketUrl = "ws://localhost:4001/socket/websocket"
+const socket = new WebSocket('ws://localhost:4001/socket/websocket')
 
-const socket = new WebSocket(socketUrl)
+socket.onopen = () => {
+  chatClient.join(socket, "room:lobby")
+}
 
-const generateRandomRef = () => Math.floor(Math.random() * 1000000)
+socket.onmessage = (event) => {
+  const response = JSON.parse(event.data)
 
-function joinTopic(topic, payload = {}) {
-  socket.onopen = () => {
-    const joinMessage = {
-      topic: topic,
-      event: "phx_join",
-      payload: payload,
-      ref: generateRandomRef()
-    }
-
-    socket.send(JSON.stringify(joinMessage))
-
-    console.log(`Attempting to join topic: ${topic}`)
+  if (response.event === 'shout') {
+    messages.value.push(response.payload)
   }
 
-  socket.onmessage = (event) => {
-    const response = JSON.parse(event.data)
-
-
-    if (response.event === 'shout') {
-      messages.value.push(response.payload)
-    }
-
-    if (response.event === 'user_list') {
-      users.value = response.payload.users
-    }
+  if (response.event === 'user_list') {
+    users.value = response.payload.users
   }
+}
 
-  socket.onerror = (error) => {
-    console.error("WebSocket error:", error)
-  }
+socket.onerror = (error) => {
+  console.error("WebSocket error:", error)
+}
 
-  socket.onclose = (event) => {
-    console.log("WebSocket closed:", event)
-  }
+socket.onclose = (event) => {
+  console.log("WebSocket closed:", event)
 }
 
 function sendMessage() {
-  const message = {
-    topic: "room:lobby",
-    event: "shout",
-    payload: {body: inputText.value},
-    ref: generateRandomRef()
-  }
-
-  socket.send(JSON.stringify(message))
+  chatClient.message(socket, "room:lobby", inputText.value)
   inputText.value = ''
 }
-
-joinTopic("room:lobby")
 </script>
 
 <template lang="pug">
 .grid-container
+  .grid-item.chats
+    ChatList(:socket="socket")
+
   .grid-item.input-wrapper
     input.input(v-model="inputText" @keydown.enter="sendMessage" autofocus)
 
   .grid-item.messages
-    .message(v-for="message in messages") 
+    .message(v-for="message in messages")
       span.handle {{ message.handle }}:
       span {{ message.body }}
 
@@ -95,7 +76,7 @@ input, textarea, select
 
 .grid-container
   display: grid
-  grid-template-columns: auto minmax(auto, 30ch)
+  grid-template-columns: minmax(auto, 30ch) auto minmax(auto, 30ch)
   grid-template-rows: auto 40px
   gap: 0px
   height: 100vh
@@ -105,17 +86,20 @@ input, textarea, select
   border: 1px solid #ccc
 
 .input-wrapper
-  grid-column: 1
+  grid-column: 2
   grid-row: 2
 
 .messages
   padding: 20px
-  grid-column: 1
+  grid-column: 2
   grid-row: 1
+
+.chats
+  grid-column: 1
 
 .users
   padding: 20px
-  grid-column: 2
+  grid-column: 3
   grid-row: 1 / 2
 
 .handle
