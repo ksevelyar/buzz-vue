@@ -7,6 +7,7 @@ import { ref } from 'vue'
 const messages = ref([])
 const inputText = ref('')
 const users = ref([])
+const chats = ref([])
 
 const socket = new WebSocket('ws://localhost:4001/socket/websocket')
 
@@ -16,6 +17,7 @@ socket.onopen = () => {
 
 socket.onmessage = (event) => {
   const response = JSON.parse(event.data)
+  console.log(response)
 
   if (response.event === 'shout') {
     messages.value.push(response.payload)
@@ -23,6 +25,10 @@ socket.onmessage = (event) => {
 
   if (response.event === 'user_list') {
     users.value = response.payload.users
+  }
+
+  if (response.event === 'chat_list') {
+    chats.value = response.payload.chats
   }
 }
 
@@ -43,7 +49,7 @@ function sendMessage() {
 <template lang="pug">
 .grid-container
   .grid-item.chats
-    ChatList(:socket="socket")
+    ChatList(:socket="socket" :chats="chats")
 
   .grid-item.input-wrapper
     input.input(v-model="inputText" @keydown.enter="sendMessage" autofocus)

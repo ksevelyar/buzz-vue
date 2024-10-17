@@ -31,8 +31,6 @@ export default {
       ref: generateRandomRef()
     }
 
-    console.log(socket)
-
     socket.send(JSON.stringify(message))
   }
 }
