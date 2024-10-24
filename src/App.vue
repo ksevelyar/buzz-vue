@@ -1,3 +1,25 @@
+<template lang="pug">
+.grid-container
+  .grid-item.chats
+    ChatList(:socket="socket" :chats="chats")
+
+  .grid-item.input-wrapper
+    input.input(
+      v-model="inputText"
+      @keydown.enter="sendMessage"
+      autofocus
+      placeholder="hit Enter to add message"
+    )
+
+  .grid-item.messages
+    .message(v-for="message in messages")
+      span.handle {{ message.handle }}:
+      span {{ message.body }}
+
+  .grid-item.users
+    .user(v-for="user in users") {{ user }}
+</template>
+
 <script setup>
 import chatClient from '@/client/chat-client.js'
 
@@ -50,22 +72,6 @@ function sendMessage() {
 }
 </script>
 
-<template lang="pug">
-.grid-container
-  .grid-item.chats
-    ChatList(:socket="socket" :chats="chats")
-
-  .grid-item.input-wrapper
-    input.input(v-model="inputText" @keydown.enter="sendMessage" autofocus)
-
-  .grid-item.messages
-    .message(v-for="message in messages")
-      span.handle {{ message.handle }}:
-      span {{ message.body }}
-
-  .grid-item.users
-    .user(v-for="user in users") {{ user }}
-</template>
 
 <style>
 .app
@@ -112,6 +118,9 @@ input, textarea, select
   padding: 20px
   grid-column: 3
   grid-row: 1 / 2
+
+.user
+  margin-bottom: 5px
 
 .handle
   margin-right: 1ch
