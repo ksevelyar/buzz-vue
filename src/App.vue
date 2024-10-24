@@ -30,6 +30,10 @@ socket.onmessage = (event) => {
   if (response.event === 'chat_list') {
     chats.value = response.payload.chats
   }
+
+  if (response.event === 'messages_list') {
+    messages.value = response.payload.messages
+  }
 }
 
 socket.onerror = (error) => {
@@ -101,6 +105,7 @@ input, textarea, select
   grid-row: 1
 
 .chats
+  padding: 20px
   grid-column: 1
 
 .users
