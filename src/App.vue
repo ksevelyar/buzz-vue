@@ -31,7 +31,8 @@ const inputText = ref('')
 const users = ref([])
 const chats = ref([])
 
-const socket = new WebSocket('ws://localhost:4001/socket/websocket')
+const back = import.meta.env.VITE_BACK
+const socket = new WebSocket(`${back}/socket/websocket`)
 
 socket.onopen = () => {
   chatClient.join(socket, "room:lobby")

@@ -16,7 +16,27 @@
         ];
 
         shellHook = ''
-          export VITE_BACK=http://buzz.lcl:5001
+          export VITE_BACK=ws://buzz.lcl:4001
+        '';
+      };
+
+      packages.default = pkgs.buildNpmPackage {
+        name = "buzz-vue";
+
+        buildInputs = with pkgs; [
+          nodejs_20
+        ];
+
+        src = self;
+
+        npmDepsHash = "sha256-WwqGHFiotjdUUpmnTDtUc9UAfEoDQgyvqyGcNhJFggI=";
+
+        VITE_BACK = "wss://api.buzz.rusty-cluster.net";
+        npmBuild = "npm run build";
+
+        installPhase = ''
+          mkdir $out
+          cp -r dist/* $out/
         '';
       };
     });
