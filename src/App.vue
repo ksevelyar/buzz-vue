@@ -1,7 +1,7 @@
 <template lang="pug">
 .grid-container
   .grid-item.chats
-    ChatList(:socket="socket" :chats="chats")
+    ChatList(:socket="socket" :chats="chats" @joinChat="setActiveChat")
 
   .grid-item.input-wrapper
     input.input(
@@ -11,10 +11,7 @@
       placeholder="hit Enter to add message"
     )
 
-  .grid-item.messages
-    .message(v-for="message in messages")
-      span.handle {{ message.handle }}:
-      span {{ message.body }}
+  ChatHistory(:messages="messages" :activeChat="activeChat")
 
   .grid-item.users
     .user(v-for="user in users") {{ user }}
@@ -24,12 +21,14 @@
 import chatClient from '@/client/chat-client.js'
 
 import ChatList from '@/components/ChatList.vue'
+import ChatHistory from '@/components/ChatHistory.vue'
 import { ref } from 'vue'
 
 const messages = ref([])
 const inputText = ref('')
 const users = ref([])
 const chats = ref([])
+const activeChat = ref('lobby')
 
 const back = import.meta.env.VITE_BACK
 const socket = new WebSocket(`${back}/socket/websocket`)
@@ -68,8 +67,12 @@ socket.onclose = (event) => {
 }
 
 function sendMessage() {
-  chatClient.message(socket, "room:lobby", inputText.value)
+  chatClient.message(socket, `room:${activeChat.value}`, inputText.value)
   inputText.value = ''
+}
+
+function setActiveChat(chatName) {
+  activeChat.value = chatName
 }
 </script>
 
