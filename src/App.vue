@@ -1,7 +1,7 @@
 <template lang="pug">
 .grid-container
   .grid-item.chats
-    ChatList(:socket="socket" :chats="chats" @joinChat="setActiveChat")
+    ChatList(:socket="socket" :chats="chats" @joinChat="setActiveChat" :activeChat="activeChat")
 
   .grid-item.input-wrapper
     input.input(
@@ -11,7 +11,7 @@
       placeholder="hit Enter to add message"
     )
 
-  ChatHistory(:messages="messages" :activeChat="activeChat")
+  ChatHistory(:messages="messages")
 
   .grid-item.users
     .user(v-for="user in users") {{ user }}

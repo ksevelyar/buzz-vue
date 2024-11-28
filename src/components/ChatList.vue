@@ -2,6 +2,7 @@
 .chat-list
   .chat(
     v-for="chat in chats"
+    :class="{'chat--active': chat === props.activeChat}"
     :key="chat"
     @click="joinChat(chat)"
   ) {{ chat }}
@@ -20,7 +21,8 @@ import { ref } from 'vue'
 const emit = defineEmits(['joinChat'])
 const props = defineProps({
   socket: Object,
-  chats: Array
+  chats: Array,
+  activeChat: String
 });
 
 const chatName = ref('')
@@ -45,6 +47,9 @@ function joinChat(name) {
 .chat
   margin-bottom: 5px
   cursor: pointer
+
+.chat--active
+  color: #7435ff
 
 .chat-name
   width: 100%
