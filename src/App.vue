@@ -14,7 +14,7 @@
   ChatHistory(:messages="messages")
 
   .grid-item.users
-    .user(v-for="user in users") {{ user }}
+    UserList(:users="users" :currentUser="currentUser")
 </template>
 
 <script setup>
@@ -22,6 +22,8 @@ import chatClient from '@/client/chat-client.js'
 
 import ChatList from '@/components/ChatList.vue'
 import ChatHistory from '@/components/ChatHistory.vue'
+import UserList from '@/components/UserList.vue'
+
 import { ref } from 'vue'
 
 const messages = ref([])
@@ -29,6 +31,7 @@ const inputText = ref('')
 const users = ref([])
 const chats = ref([])
 const activeChat = ref('lobby')
+const currentUser = ref('')
 
 const back = import.meta.env.VITE_BACK
 const socket = new WebSocket(`${back}/socket/websocket`)
@@ -47,6 +50,10 @@ socket.onmessage = (event) => {
 
   if (response.event === 'user_list') {
     users.value = response.payload.users
+  }
+
+  if (response.event === 'handle') {
+    currentUser.value = response.payload.handle
   }
 
   if (response.event === 'chat_list') {
@@ -84,6 +91,7 @@ function setActiveChat(chatName) {
 .input
   border-radius: 4px
   border: 1px solid #ddd
+  background: #ededed
   padding: 10px
   outline: none
   width: 100%
@@ -102,9 +110,6 @@ input, textarea, select
   height: 100vh
   width: 100%
 
-.grid-item
-  border: 1px solid #ccc
-
 .input-wrapper
   grid-column: 2
   grid-row: 2
@@ -113,6 +118,8 @@ input, textarea, select
   padding: 20px
   grid-column: 2
   grid-row: 1
+  border-left: 1px solid #C0C0C0
+  border-right: 1px solid #C0C0C0
 
 .chats
   padding: 20px
